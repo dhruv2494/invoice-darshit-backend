@@ -60,87 +60,127 @@ exports.downloadInvoice = async (req, res, next) => {
 
 // Helper function to generate the PDF using Puppeteer
 async function generatePDF(order) {
-  const browser = await puppeteer.launch();
-  const page = await browser.newPage();
-
-  // Prepare the HTML for the invoice (you can customize the HTML template)
-  const invoiceHTML = `
-    <html>
-      <head>
-        <style>
-          body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            color: #333;
-          }
-          h1, h2, h3 {
-            color: #4A90E2;
-          }
-          .container {
-            padding: 20px;
-            width: 100%;
-          }
-          table {
-            width: 100%;
-            border-collapse: collapse;
-          }
-          th, td {
-            padding: 10px;
-            text-align: left;
-            border: 1px solid #ddd;
-          }
-          th {
-            background-color: #f2f2f2;
-          }
-          .total {
-            font-weight: bold;
-            font-size: 18px;
-          }
-        </style>
-      </head>
-      <body>
-        <div class="container">
-          <h1>Invoice</h1>
-          <h2>Ref No: ${order.refNo}</h2>
-          <h3>Customer: ${order.customerName}</h3>
-          <h4>Email: ${order.email}</h4>
-          
-          <table>
-            <thead>
-              <tr>
-                <th>Item</th>
-                <th>Quantity</th>
-                <th>Price</th>
-                <th>Total</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>${order.itemName}</td>
-                <td>${order.quantity}</td>
-                <td>₹${order.price}</td>
-                <td>₹${order.price * order.quantity}</td>
-              </tr>
-            </tbody>
-          </table>
-
-          <p class="total">Total: ₹${order.price * order.quantity}</p>
-        </div>
-      </body>
-    </html>
-  `;
-
-  // Set the page content
-  await page.setContent(invoiceHTML);
-
-  // Generate the PDF from the HTML content
-  const pdfBuffer = await page.pdf({
-    format: 'A4', // PDF page format
-    printBackground: true, // Print background images (if any)
-  });
-
-  await browser.close();
-
-  return pdfBuffer;
-}
+    const browser = await puppeteer.launch();
+    const page = await browser.newPage();
+  
+    // Prepare the HTML for the invoice (simplified and clean design)
+    const invoiceHTML = `
+      <html>
+        <head>
+          <style>
+            body {
+              font-family: 'Arial', sans-serif;
+              margin: 0;
+              padding: 20px;
+              background-color: #fff;
+              color: #333;
+              font-size: 14px;
+            }
+            h1, h2 {
+              margin-bottom: 0;
+              color: #000;
+              font-size: 20px;
+              font-weight: normal;
+            }
+            .container {
+              max-width: 800px;
+              margin: auto;
+            }
+            .header, .footer {
+              text-align: center;
+            }
+            .header {
+              margin-bottom: 20px;
+            }
+            .footer {
+              font-size: 12px;
+              margin-top: 30px;
+              color: #666;
+            }
+            .invoice-details {
+              margin-bottom: 20px;
+            }
+            table {
+              width: 100%;
+              border-collapse: collapse;
+              margin-top: 20px;
+            }
+            th, td {
+              padding: 8px;
+              text-align: left;
+              border: 1px solid #ddd;
+            }
+            th {
+              background-color: #f2f2f2;
+            }
+            .total {
+              font-weight: bold;
+              text-align: right;
+              padding-right: 20px;
+              margin-top: 20px;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1>Invoice</h1>
+              <h2>Ref No: ${order.refNo}</h2>
+            </div>
+  
+            <div class="invoice-details">
+              <p><strong>Customer:</strong> ${order.customerName}</p>
+              <p><strong>Email:</strong> ${order.email}</p>
+            </div>
+  
+            <table>
+              <thead>
+                <tr>
+                  <th>Item</th>
+                  <th>Quantity</th>
+                  <th>Price (₹)</th>
+                  <th>Total (₹)</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>${order.itemName}</td>
+                  <td>${order.quantity}</td>
+                  <td>${order.price}</td>
+                  <td>${order.price * order.quantity}</td>
+                </tr>
+              </tbody>
+            </table>
+  
+            <p class="total">Total: ₹${order.price * order.quantity}</p>
+  
+            <div class="footer">
+              <p>Thank you for your business!</p>
+              <p>For any queries, contact support@gmail.com</p>
+            </div>
+          </div>
+        </body>
+      </html>
+    `;
+  
+    // Set the page content
+    await page.setContent(invoiceHTML);
+  
+    // Generate the PDF from the HTML content
+    const pdfBuffer = await page.pdf({
+      format: 'A4', // PDF page format
+      printBackground: true, // Print background images (if any)
+      margin: {
+        top: '20mm',
+        right: '20mm',
+        bottom: '20mm',
+        left: '20mm'
+      }
+    });
+  
+    await browser.close();
+  
+    return pdfBuffer;
+  }
+  
+  
