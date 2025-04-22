@@ -1,7 +1,152 @@
 const ErrorHandler = require("../../utils/default/errorHandler");
 const puppeteer = require("puppeteer");
 const fs = require("fs");
+const { v4: uuidv4 } = require("uuid");
 
+exports.AddUpdate = async (req, res, next) => {
+  const pool = req.pool;
+  const {
+    uuid,
+    refNo,
+    grossWeight,
+    tareWeight,
+    netWeight,
+    weighingLoss,
+    container,
+    weightDeduction,
+    cleanWeight,
+    price,
+    totalAmount,
+    laborCharges,
+    netAmount,
+    deduction,
+    airLoss,
+    netDeduction,
+    oilContentReport,
+    purchaseOrderId,
+    customerId,
+  } = req.body;
+
+  try {
+    if (uuid) {
+      // Update existing invoice
+      const [result] = await pool.query(
+        `UPDATE invoice SET
+          purchaseOrderId = ?, refNo = ?, customerId = ?, grossWeight = ?, tareWeight = ?, netWeight = ?,
+          weighingLoss = ?, container = ?, weightDeduction = ?, cleanWeight = ?, price = ?, totalAmount = ?,
+          laborCharges = ?, netAmount = ?, deduction = ?, airLoss = ?, netDeduction = ?, oilContentReport = ?
+        WHERE uuid = ?`,
+        [
+          purchaseOrderId,
+          refNo,
+          customerId,
+          grossWeight,
+          tareWeight,
+          netWeight,
+          weighingLoss,
+          container,
+          weightDeduction,
+          cleanWeight,
+          price,
+          totalAmount,
+          laborCharges,
+          netAmount,
+          deduction,
+          airLoss,
+          netDeduction,
+          oilContentReport,
+          uuid,
+        ]
+      );
+
+      if (result.affectedRows === 0) {
+        return res.status(404).json({ message: "Invoice not found" });
+      }
+
+      return res
+        .status(200)
+        .json({ message: "Invoice updated successfully", uuid });
+    } else {
+      // Add new invoice
+      const newUuid = uuidv4();
+      await pool.query(
+        `INSERT INTO invoice (
+          uuid, purchaseOrderId, refNo, customerId, grossWeight, tareWeight, netWeight, weighingLoss,
+          container, weightDeduction, cleanWeight, price, totalAmount, laborCharges,
+          netAmount, deduction, airLoss, netDeduction, oilContentReport
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [
+          newUuid,
+          purchaseOrderId,
+          refNo,
+          customerId,
+          grossWeight,
+          tareWeight,
+          netWeight,
+          weighingLoss,
+          container,
+          weightDeduction,
+          cleanWeight,
+          price,
+          totalAmount,
+          laborCharges,
+          netAmount,
+          deduction,
+          airLoss,
+          netDeduction,
+          oilContentReport,
+        ]
+      );
+
+      return res
+        .status(201)
+        .json({ message: "Invoice created successfully", uuid: newUuid });
+    }
+  } catch (error) {
+    console.error(error);
+    return next(new Error("Failed to create or update invoice"));
+  }
+};
+
+exports.Get = async (req, res, next) => {
+  const pool = req.pool;
+
+  try {
+    const [rows] = await pool.query(
+      `SELECT 
+        i.uuid,
+        i.refNo,
+        i.grossWeight,
+        i.tareWeight,
+        i.netWeight,
+        i.weighingLoss,
+        i.container,
+        i.weightDeduction,
+        i.cleanWeight,
+        i.price,
+        i.totalAmount,
+        i.laborCharges,
+        i.netAmount,
+        i.deduction,
+        i.airLoss,
+        i.netDeduction,
+        i.oilContentReport,
+        c.name AS customerName,
+        c.mobile,
+        c.email,
+        po.itemName
+      FROM invoice i
+      LEFT JOIN customer c ON i.customerId = c.uuid
+      LEFT JOIN purchase_orders po ON i.purchaseOrderId = po.uuid
+      ORDER BY i.id DESC`
+    );
+
+    res.status(200).json({ Status: "200", Message: "Success", list: rows });
+  } catch (error) {
+    console.error("Error fetching invoices:", error);
+    return next(new Error("Failed to fetch invoices"));
+  }
+};
 
 exports.downloadInvoice = async (req, res, next) => {
   const pool = req.pool;
@@ -26,12 +171,14 @@ exports.downloadInvoice = async (req, res, next) => {
     const pdfBuffer = await generatePDF(rows[0]);
 
     // Set the correct headers to indicate this is a PDF file
-    res.setHeader('Content-Type', 'application/pdf'); // Set content type as PDF
-    res.setHeader('Content-Disposition', `attachment; filename=Invoice_${uuid}.pdf`); // Force download with proper filename
+    res.setHeader("Content-Type", "application/pdf"); // Set content type as PDF
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename=Invoice_${uuid}.pdf`
+    ); // Force download with proper filename
 
     // Send the PDF buffer as the response (in binary form)
     res.end(pdfBuffer);
-
   } catch (error) {
     console.error(error);
     return next(new ErrorHandler("Error while retrieving invoice!", 500));
@@ -40,11 +187,11 @@ exports.downloadInvoice = async (req, res, next) => {
 
 // Helper function to generate the PDF using Puppeteer
 async function generatePDF(order) {
-    const browser = await puppeteer.launch();
-    const page = await browser.newPage();
-  
-    // Prepare the HTML for the invoice (simplified and clean design)
-    const invoiceHTML = `
+  const browser = await puppeteer.launch();
+  const page = await browser.newPage();
+
+  // Prepare the HTML for the invoice (simplified and clean design)
+  const invoiceHTML = `
       <html>
         <head>
           <style>
@@ -142,25 +289,23 @@ async function generatePDF(order) {
         </body>
       </html>
     `;
-  
-    // Set the page content
-    await page.setContent(invoiceHTML);
-  
-    // Generate the PDF from the HTML content
-    const pdfBuffer = await page.pdf({
-      format: 'A4', // PDF page format
-      printBackground: true, // Print background images (if any)
-      margin: {
-        top: '20mm',
-        right: '20mm',
-        bottom: '20mm',
-        left: '20mm'
-      }
-    });
-  
-    await browser.close();
-  
-    return pdfBuffer;
-  }
-  
-  
+
+  // Set the page content
+  await page.setContent(invoiceHTML);
+
+  // Generate the PDF from the HTML content
+  const pdfBuffer = await page.pdf({
+    format: "A4", // PDF page format
+    printBackground: true, // Print background images (if any)
+    margin: {
+      top: "20mm",
+      right: "20mm",
+      bottom: "20mm",
+      left: "20mm",
+    },
+  });
+
+  await browser.close();
+
+  return pdfBuffer;
+}
