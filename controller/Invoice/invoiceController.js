@@ -2,26 +2,6 @@ const ErrorHandler = require("../../utils/default/errorHandler");
 const puppeteer = require("puppeteer");
 const fs = require("fs");
 
-exports.GetComplatedPurchaseOrder = async (req, res, next) => {
-  const pool = req.pool;
-
-  try {
-    const [rows] = await pool.query(
-      `SELECT po.*, c.name AS customerName 
-         FROM purchase_orders po 
-         LEFT JOIN customer c ON po.customer = c.uuid
-         WHERE po.status = 'completed' 
-         ORDER BY po.createdAt DESC`
-    );
-
-    res.status(200).json({ Status: "200", Message: "Success", list: rows });
-  } catch (err) {
-    console.error(err);
-    return next(
-      new ErrorHandler("Error while retrieving purchase orders!", 500)
-    );
-  }
-};
 
 exports.downloadInvoice = async (req, res, next) => {
   const pool = req.pool;

@@ -5,10 +5,8 @@ const { v4: uuidv4 } = require("uuid");
 exports.AddUpdate = async (req, res, next) => {
   const {
     uuid,
-    refNo, // new field
-    customer,
-    mobile,
-    email,
+    refNo,
+    customerId,
     price,
     quantity,
     itemName,
@@ -34,9 +32,9 @@ exports.AddUpdate = async (req, res, next) => {
       // Update PO including refNo
       await pool.query(
         `UPDATE purchase_orders 
-         SET refNo = ?, customer = ?, mobile = ?, email = ?, price = ?, quantity = ?, itemName = ?, status = ?, updated_at = ?
+         SET refNo = ?, customerId = ?, price = ?, quantity = ?, itemName = ?, status = ?, updated_at = ?
          WHERE uuid = ?`,
-        [refNo, customer, mobile, email, price, quantity, itemName, status, currentTimestamp, uuid]
+        [refNo, customerId, price, quantity, itemName, status, currentTimestamp, uuid]
       );
 
       const [updatedPO] = await pool.query(
@@ -56,14 +54,12 @@ exports.AddUpdate = async (req, res, next) => {
 
       await pool.query(
         `INSERT INTO purchase_orders 
-         (uuid, refNo, customer, mobile, email, price, quantity, itemName, status, created_by, created_at)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+         (uuid, refNo, customerId, price, quantity, itemName, status, created_by, created_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           newUUID,
           refNo,
-          customer,
-          mobile,
-          email,
+          customerId,
           price,
           quantity,
           itemName,
@@ -110,9 +106,9 @@ exports.Get = async (req, res, next) => {
 
   try {
     const [rows] = await pool.query(
-      `SELECT po.*, c.name AS customerName 
+      `SELECT po.*, c.name AS customerName, c.email AS email, c.mobile AS mobile 
        FROM purchase_orders po 
-       LEFT JOIN customer c ON po.customer = c.uuid
+       LEFT JOIN customer c ON po.customerId = c.uuid
        ORDER BY po.createdAt DESC`
     );
 
@@ -120,5 +116,25 @@ exports.Get = async (req, res, next) => {
   } catch (err) {
     console.error(err);
     return next(new ErrorHandler("Error while retrieving purchase orders!", 500));
+  }
+};
+
+// Get Completed Purchase Orders
+exports.GetComplatedPurchaseOrder = async (req, res, next) => {
+  const pool = req.pool;
+
+  try {
+    const [rows] = await pool.query(
+      `SELECT po.*, c.name AS customerName, c.email AS email, c.mobile AS mobile 
+       FROM purchase_orders po 
+       LEFT JOIN customer c ON po.customerId = c.uuid
+       WHERE po.status = 'completed' 
+       ORDER BY po.createdAt DESC`
+    );
+
+    res.status(200).json({ Status: "200", Message: "Success", list: rows });
+  } catch (err) {
+    console.error(err);
+    return next(new ErrorHandler("Error while retrieving completed purchase orders!", 500));
   }
 };
