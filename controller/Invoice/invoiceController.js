@@ -208,103 +208,153 @@ async function generatePDF(order) {
 
   const invoiceHTML = `
   <html>
-    <head>
-      <style>
+
+<head>
+    <style>
         body {
-          font-family: Arial, sans-serif;
-          padding: 20px;
+            font-family: Arial, sans-serif;
+            padding: 20px;
         }
+
+        .details-table td,
+        .details-table th {
+            border: 1px solid #000;
+            padding: 6px;
+        }
+
         table {
-          width: 100%;
-          border-collapse: collapse;
-          margin-bottom: 10px;
+            border-collapse: collapse;
+            width: 100%;
+            margin-bottom: 10px;
         }
-        td, th {
-          border: 1px solid #000;
-          padding: 8px;
-          text-align: left;
-          vertical-align: top;
+
+        .table-1 td,
+        .table-1 th {
+            border: 1px solid #000;
+            padding: 8px;
+            text-align: left;
         }
-        th {
-          background-color: #f2f2f2;
-        }
+
         .label {
-          font-weight: bold;
+            font-weight: bold;
         }
-        .section-title {
-          text-align: center;
-          font-weight: bold;
-          border-bottom: 2px solid black;
-          margin: 20px 0 10px;
-          font-size: 16px;
+
+        .split-container {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
         }
-      </style>
-    </head>
-    <body>
 
-      <table>
-        <tr>
-          <td colspan="4"><strong>Ref No:</strong> ${order.refNo}</td>
-        </tr>
-        <tr>
-          <td class="label">Customer Name</td><td>${order.customerName}</td>
-          <td class="label">Mobile Number</td><td>${order.mobile}</td>
-        </tr>
-        <tr>
-          <td class="label">Customer Email</td><td>${order.email}</td>
-          <td class="label">Item Name</td><td>${order.itemName}</td>
-        </tr>
-      </table>
+        .half-table {
+            width: 50%;
+        }
 
-      <table>
-        <tr>
-          <td class="label">Gross Weight</td><td>${order.grossWeight}</td>
-          <td class="label">Deduction</td><td>${order.deduction}</td>
-        </tr>
-        <tr>
-          <td class="label">Tare Weight</td><td>${order.tareWeight}</td>
-          <td></td><td></td>
-        </tr>
-        <tr>
-          <td class="label">Net Weight</td><td>${order.netWeight}</td>
-          <td class="label">Air</td><td>${order.airLoss}</td>
-        </tr>
-        <tr>
-          <td class="label">Weighing Loss</td><td>${order.weighingLoss}</td>
-          <td></td><td></td>
-        </tr>
-        <tr>
-          <td class="label">Container</td><td>${order.container}</td>
-          <td></td><td></td>
-        </tr>
-        <tr>
-          <td class="label">Weight Deduction</td><td>${order.weightDeduction}</td>
-          <td class="label">Net Deduction</td><td>${order.netDeduction}</td>
-        </tr>
-        <tr>
-          <td class="label">Clean Weight</td><td>${order.cleanWeight}</td>
-          <td></td><td></td>
-        </tr>
-        <tr>
-          <td class="label">Price</td><td>${order.price}</td>
-          <td></td><td></td>
-        </tr>
-        <tr>
-          <td class="label">Total Amount</td><td>${order.totalAmount}</td>
-          <td class="label">Oil Content Report</td><td>${order.oilContentReport}</td>
-        </tr>
-        <tr>
-          <td class="label">Labor Charges</td><td>${order.laborCharges}</td>
-          <td></td><td></td>
-        </tr>
-        <tr>
-          <td class="label">Net Amount</td><td>${order.netAmount}</td>
-          <td></td><td></td>
-        </tr>
-      </table>
+        .value-cell {
+            width: 50%;
+        }
 
-    </body>
-  </html>
+        .table-2 {
+            border: 1px solid #000;
+            border-left: 0px;
+        }
+
+        .table-2 td,
+        .table-2 th {
+            padding: 8px;
+            text-align: left;
+        }
+    </style>
+</head>
+
+<body>
+
+    <table class="details-table">
+        <tr>
+            <td colspan="4"><strong>Ref No:</strong> ${order.refNo}</td>
+        </tr>
+        <tr>
+            <td class="label">Customer Name</td>
+            <td>${order.customerName}</td>
+            <td class="label">Mobile Number</td>
+            <td>${order.mobile}</td>
+        </tr>
+        <tr>
+            <td class="label">Customer Email</td>
+            <td>${order.email}</td>
+            <td class="label">Item Name</td>
+            <td>${order.itemName}</td>
+        </tr>
+    </table>
+
+    <div class="split-container">
+        <!-- Left Table (T1) -->
+        <table class="half-table table-1">
+            <tr>
+                <td class="label">Gross Weight</td>
+                <td class="value-cell">${order.grossWeight}</td>
+            </tr>
+            <tr>
+                <td class="label">Tare Weight</td>
+                <td class="value-cell">${order.tareWeight}</td>
+            </tr>
+            <tr>
+                <td class="label">Weighing Loss</td>
+                <td class="value-cell">${order.weighingLoss}</td>
+            </tr>
+            <tr>
+                <td class="label">Container</td>
+                <td class="value-cell">${order.container}</td>
+            </tr>
+            <tr>
+                <td class="label">Weight Deduction</td>
+                <td class="value-cell">${order.weightDeduction}</td>
+            </tr>
+            <tr>
+                <td class="label">Clean Weight</td>
+                <td class="value-cell">${order.cleanWeight}</td>
+            </tr>
+            <tr>
+                <td class="label">Price</td>
+                <td class="value-cell">${order.price}</td>
+            </tr>
+            <tr>
+                <td class="label">Total Amount</td>
+                <td class="value-cell">${order.totalAmount}</td>
+            </tr>
+            <tr>
+                <td class="label">Labor Charges</td>
+                <td class="value-cell">${order.laborCharges}</td>
+            </tr>
+            <tr>
+                <td class="label">Net Amount</td>
+                <td class="value-cell">${order.netAmount}</td>
+            </tr>
+        </table>
+
+        <!-- Right Table (T2) -->
+        <table class="half-table table-2">
+            <tr>
+                <td class="label">Deduction</td>
+                <td class="value-cell">${order.deduction}</td>
+            </tr>
+            <tr>
+                <td class="label">Air</td>
+                <td class="value-cell">${order.airLoss}</td>
+            </tr>
+            <tr>
+                <td class="label">Net Deduction</td>
+                <td class="value-cell">${order.netDeduction}</td>
+            </tr>
+            <tr>
+                <td class="label">Oil Content Report</td>
+                <td class="value-cell">${order.oilContentReport}</td>
+            </tr>
+        </table>
+    </div>
+
+</body>
+
+</html>
   `;
 
   await page.setContent(invoiceHTML, { waitUntil: "networkidle0" });
