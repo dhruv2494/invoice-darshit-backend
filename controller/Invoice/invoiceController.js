@@ -283,7 +283,7 @@ async function generatePDF(order) {
 
     <table class="details-table">
         <tr>
-            <td colspan="4"><strong>Ref No:</strong> $?{order??"-".refNo}</td>
+            <td colspan="4"><strong>Ref No:</strong> ${order.refNo??"-"}</td>
         </tr>
         <tr>
             <td class="label">Customer Name</td>
