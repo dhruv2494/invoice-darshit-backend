@@ -153,159 +153,105 @@ exports.downloadInvoice = async (req, res, next) => {
   const uuid = req.params.purchaseOrderUuid;
 
   try {
-    // Query the database for the purchase order details
     const [rows] = await pool.query(
-      `SELECT po.*, c.name AS customerName
-       FROM purchase_orders po
-       LEFT JOIN customer c ON po.customer = c.uuid
-       WHERE po.status = 'completed' AND po.uuid = ?`,
+      `SELECT 
+        i.uuid,
+        i.refNo,
+        i.grossWeight,
+        i.tareWeight,
+        i.netWeight,
+        i.weighingLoss,
+        i.container,
+        i.weightDeduction,
+        i.cleanWeight,
+        i.price,
+        i.totalAmount,
+        i.laborCharges,
+        i.netAmount,
+        i.deduction,
+        i.airLoss,
+        i.netDeduction,
+        i.oilContentReport,
+        c.name AS customerName,
+        c.mobile,
+        c.email,
+        po.itemName
+      FROM invoice i
+      LEFT JOIN customer c ON i.customerId = c.uuid
+      LEFT JOIN purchase_orders po ON i.purchaseOrderId = po.uuid
+      WHERE i.uuid = ?
+      ORDER BY i.id DESC`,
       [uuid]
     );
 
-    // Check if no order found
     if (rows.length === 0) {
       return res.status(404).json({ message: "Invoice not found." });
     }
 
-    // Generate the PDF content using Puppeteer (or any PDF generator of your choice)
     const pdfBuffer = await generatePDF(rows[0]);
 
-    // Set the correct headers to indicate this is a PDF file
-    res.setHeader("Content-Type", "application/pdf"); // Set content type as PDF
+    res.setHeader("Content-Type", "application/pdf");
     res.setHeader(
       "Content-Disposition",
       `attachment; filename=Invoice_${uuid}.pdf`
-    ); // Force download with proper filename
-
-    // Send the PDF buffer as the response (in binary form)
+    );
     res.end(pdfBuffer);
   } catch (error) {
     console.error(error);
-    return next(new ErrorHandler("Error while retrieving invoice!", 500));
+    return next(new Error("Error while retrieving invoice!"));
   }
 };
 
-// Helper function to generate the PDF using Puppeteer
 async function generatePDF(order) {
   const browser = await puppeteer.launch();
   const page = await browser.newPage();
 
-  // Prepare the HTML for the invoice (simplified and clean design)
   const invoiceHTML = `
-      <html>
-        <head>
-          <style>
-            body {
-              font-family: 'Arial', sans-serif;
-              margin: 0;
-              padding: 20px;
-              background-color: #fff;
-              color: #333;
-              font-size: 14px;
-            }
-            h1, h2 {
-              margin-bottom: 0;
-              color: #000;
-              font-size: 20px;
-              font-weight: normal;
-            }
-            .container {
-              max-width: 800px;
-              margin: auto;
-            }
-            .header, .footer {
-              text-align: center;
-            }
-            .header {
-              margin-bottom: 20px;
-            }
-            .footer {
-              font-size: 12px;
-              margin-top: 30px;
-              color: #666;
-            }
-            .invoice-details {
-              margin-bottom: 20px;
-            }
-            table {
-              width: 100%;
-              border-collapse: collapse;
-              margin-top: 20px;
-            }
-            th, td {
-              padding: 8px;
-              text-align: left;
-              border: 1px solid #ddd;
-            }
-            th {
-              background-color: #f2f2f2;
-            }
-            .total {
-              font-weight: bold;
-              text-align: right;
-              padding-right: 20px;
-              margin-top: 20px;
-            }
-          </style>
-        </head>
-        <body>
-          <div class="container">
-            <div class="header">
-              <h1>Invoice</h1>
-              <h2>Ref No: ${order.refNo}</h2>
-            </div>
-  
-            <div class="invoice-details">
-              <p><strong>Customer:</strong> ${order.customerName}</p>
-              <p><strong>Email:</strong> ${order.email}</p>
-            </div>
-  
-            <table>
-              <thead>
-                <tr>
-                  <th>Item</th>
-                  <th>Quantity</th>
-                  <th>Price (₹)</th>
-                  <th>Total (₹)</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>${order.itemName}</td>
-                  <td>${order.quantity}</td>
-                  <td>${order.price}</td>
-                  <td>${order.price * order.quantity}</td>
-                </tr>
-              </tbody>
-            </table>
-  
-            <p class="total">Total: ₹${order.price * order.quantity}</p>
-  
-            <div class="footer">
-              <p>Thank you for your business!</p>
-              <p>For any queries, contact support@gmail.com</p>
-            </div>
-          </div>
-        </body>
-      </html>
-    `;
+  <html>
+    <head>
+      <style>
+        body { font-family: Arial, sans-serif; font-size: 14px; padding: 20px; }
+        h1, h2, h3 { margin: 0; }
+        .header, .section { margin-bottom: 20px; }
+        .grid { display: grid; grid-template-columns: auto auto auto auto; gap: 10px; }
+        .divider { border-top: 1px solid #000; margin: 20px 0; }
+        .label { font-weight: bold; }
+      </style>
+    </head>
+    <body>
+      <div class="header">
+        <h2>Ref No: ${order.refNo}</h2>
+        <p><strong>Customer Name:</strong> ${order.customerName} &nbsp;&nbsp; <strong>Mobile:</strong> ${order.mobile}</p>
+        <p><strong>Email:</strong> ${order.email} &nbsp;&nbsp; <strong>Item Name:</strong> ${order.itemName}</p>
+      </div>
 
-  // Set the page content
-  await page.setContent(invoiceHTML);
+      <div class="divider"></div>
 
-  // Generate the PDF from the HTML content
+      <div class="grid">
+        <div class="label">Gross Weight</div><div>${order.grossWeight}</div><div class="label">Deduction</div><div>${order.deduction}</div>
+        <div class="label">Tare Weight</div><div>${order.tareWeight}</div><div></div><div></div>
+        <div class="label">Net Weight</div><div>${order.netWeight}</div><div class="label">Air</div><div>${order.airLoss}</div>
+        <div class="label">Weighing Loss</div><div>${order.weighingLoss}</div><div></div><div></div>
+        <div class="label">Container</div><div>${order.container}</div><div></div><div></div>
+        <div class="label">Weight Deduction</div><div>${order.weightDeduction}</div><div class="label">Net Deduction</div><div>${order.netDeduction}</div>
+        <div class="label">Clean Weight</div><div>${order.cleanWeight}</div><div></div><div></div>
+        <div class="label">Price</div><div>${order.price}</div><div></div><div></div>
+        <div class="label">Total Amount</div><div>${order.totalAmount}</div><div class="label">Oil Content Report</div><div>${order.oilContentReport}</div>
+        <div class="label">Labor Charges</div><div>${order.laborCharges}</div><div></div><div></div>
+        <div class="label">Net Amount</div><div>${order.netAmount}</div><div></div><div></div>
+      </div>
+    </body>
+  </html>
+  `;
+
+  await page.setContent(invoiceHTML, { waitUntil: "networkidle0" });
+
   const pdfBuffer = await page.pdf({
-    format: "A4", // PDF page format
-    printBackground: true, // Print background images (if any)
-    margin: {
-      top: "20mm",
-      right: "20mm",
-      bottom: "20mm",
-      left: "20mm",
-    },
+    format: "A4",
+    printBackground: true,
+    margin: { top: "20mm", bottom: "20mm", left: "15mm", right: "15mm" },
   });
 
   await browser.close();
-
   return pdfBuffer;
 }
