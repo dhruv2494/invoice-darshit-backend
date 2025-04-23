@@ -210,36 +210,99 @@ async function generatePDF(order) {
   <html>
     <head>
       <style>
-        body { font-family: Arial, sans-serif; font-size: 14px; padding: 20px; }
-        h1, h2, h3 { margin: 0; }
-        .header, .section { margin-bottom: 20px; }
-        .grid { display: grid; grid-template-columns: auto auto auto auto; gap: 10px; }
-        .divider { border-top: 1px solid #000; margin: 20px 0; }
-        .label { font-weight: bold; }
+        body {
+          font-family: Arial, sans-serif;
+          padding: 20px;
+        }
+        table {
+          width: 100%;
+          border-collapse: collapse;
+          margin-bottom: 10px;
+        }
+        td, th {
+          border: 1px solid #000;
+          padding: 8px;
+          text-align: left;
+          vertical-align: top;
+        }
+        th {
+          background-color: #f2f2f2;
+        }
+        .label {
+          font-weight: bold;
+        }
+        .section-title {
+          text-align: center;
+          font-weight: bold;
+          border-bottom: 2px solid black;
+          margin: 20px 0 10px;
+          font-size: 16px;
+        }
       </style>
     </head>
     <body>
-      <div class="header">
-        <h2>Ref No: ${order.refNo}</h2>
-        <p><strong>Customer Name:</strong> ${order.customerName} &nbsp;&nbsp; <strong>Mobile:</strong> ${order.mobile}</p>
-        <p><strong>Email:</strong> ${order.email} &nbsp;&nbsp; <strong>Item Name:</strong> ${order.itemName}</p>
-      </div>
 
-      <div class="divider"></div>
+      <table>
+        <tr>
+          <td colspan="4"><strong>Ref No:</strong> ${order.refNo}</td>
+        </tr>
+        <tr>
+          <td class="label">Customer Name</td><td>${order.customerName}</td>
+          <td class="label">Mobile Number</td><td>${order.mobile}</td>
+        </tr>
+        <tr>
+          <td class="label">Customer Email</td><td>${order.email}</td>
+          <td class="label">Item Name</td><td>${order.itemName}</td>
+        </tr>
+      </table>
 
-      <div class="grid">
-        <div class="label">Gross Weight</div><div>${order.grossWeight}</div><div class="label">Deduction</div><div>${order.deduction}</div>
-        <div class="label">Tare Weight</div><div>${order.tareWeight}</div><div></div><div></div>
-        <div class="label">Net Weight</div><div>${order.netWeight}</div><div class="label">Air</div><div>${order.airLoss}</div>
-        <div class="label">Weighing Loss</div><div>${order.weighingLoss}</div><div></div><div></div>
-        <div class="label">Container</div><div>${order.container}</div><div></div><div></div>
-        <div class="label">Weight Deduction</div><div>${order.weightDeduction}</div><div class="label">Net Deduction</div><div>${order.netDeduction}</div>
-        <div class="label">Clean Weight</div><div>${order.cleanWeight}</div><div></div><div></div>
-        <div class="label">Price</div><div>${order.price}</div><div></div><div></div>
-        <div class="label">Total Amount</div><div>${order.totalAmount}</div><div class="label">Oil Content Report</div><div>${order.oilContentReport}</div>
-        <div class="label">Labor Charges</div><div>${order.laborCharges}</div><div></div><div></div>
-        <div class="label">Net Amount</div><div>${order.netAmount}</div><div></div><div></div>
-      </div>
+      <table>
+        <tr>
+          <td class="label">Gross Weight</td><td>${order.grossWeight}</td>
+          <td class="label">Deduction</td><td>${order.deduction}</td>
+        </tr>
+        <tr>
+          <td class="label">Tare Weight</td><td>${order.tareWeight}</td>
+          <td></td><td></td>
+        </tr>
+        <tr>
+          <td class="label">Net Weight</td><td>${order.netWeight}</td>
+          <td class="label">Air</td><td>${order.airLoss}</td>
+        </tr>
+        <tr>
+          <td class="label">Weighing Loss</td><td>${order.weighingLoss}</td>
+          <td></td><td></td>
+        </tr>
+        <tr>
+          <td class="label">Container</td><td>${order.container}</td>
+          <td></td><td></td>
+        </tr>
+        <tr>
+          <td class="label">Weight Deduction</td><td>${order.weightDeduction}</td>
+          <td class="label">Net Deduction</td><td>${order.netDeduction}</td>
+        </tr>
+        <tr>
+          <td class="label">Clean Weight</td><td>${order.cleanWeight}</td>
+          <td></td><td></td>
+        </tr>
+        <tr>
+          <td class="label">Price</td><td>${order.price}</td>
+          <td></td><td></td>
+        </tr>
+        <tr>
+          <td class="label">Total Amount</td><td>${order.totalAmount}</td>
+          <td class="label">Oil Content Report</td><td>${order.oilContentReport}</td>
+        </tr>
+        <tr>
+          <td class="label">Labor Charges</td><td>${order.laborCharges}</td>
+          <td></td><td></td>
+        </tr>
+        <tr>
+          <td class="label">Net Amount</td><td>${order.netAmount}</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+
     </body>
   </html>
   `;
