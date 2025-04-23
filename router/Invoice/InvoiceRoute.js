@@ -6,6 +6,7 @@ const {
   downloadInvoice,
   AddUpdate,
   Get,
+  Delete,
 } = require("../../controller/invoice/invoiceController");
 
 router.get(
@@ -22,6 +23,11 @@ router.get(
   "/Get",
   authTokenMiddleware,
   Get
+);
+router.delete(
+  "/Delete/:uuid",
+  authTokenMiddleware,
+  Delete
 );
 
 module.exports = router;

@@ -107,7 +107,18 @@ exports.AddUpdate = async (req, res, next) => {
     return next(new Error("Failed to create or update invoice"));
   }
 };
+exports.Delete = async (req, res, next) => {
+  const { uuid } = req.params;
+  const pool = req.pool;
 
+  try {
+    await pool.query(`DELETE FROM invoice WHERE uuid = ?`, [uuid]);
+    res.status(200).json({ Status: "200", Message: "Success" });
+  } catch (err) {
+    console.error(err);
+    return next(new ErrorHandler("Error while deleting purchase order!", 500));
+  }
+};
 exports.Get = async (req, res, next) => {
   const pool = req.pool;
 
@@ -131,6 +142,8 @@ exports.Get = async (req, res, next) => {
         i.airLoss,
         i.netDeduction,
         i.oilContentReport,
+        i.purchaseOrderId,
+        i.customerId,
         c.name AS customerName,
         c.mobile,
         c.email,
@@ -270,19 +283,19 @@ async function generatePDF(order) {
 
     <table class="details-table">
         <tr>
-            <td colspan="4"><strong>Ref No:</strong> ${order.refNo}</td>
+            <td colspan="4"><strong>Ref No:</strong> $?{order??"-".refNo}</td>
         </tr>
         <tr>
             <td class="label">Customer Name</td>
-            <td>${order.customerName}</td>
+            <td>${order?.customerName ?? "-"}</td>
             <td class="label">Mobile Number</td>
-            <td>${order.mobile}</td>
+            <td>${order?.mobile ?? "-"}</td>
         </tr>
         <tr>
             <td class="label">Customer Email</td>
-            <td>${order.email}</td>
+            <td>${order?.email ?? "-"}</td>
             <td class="label">Item Name</td>
-            <td>${order.itemName}</td>
+            <td>${order?.itemName ?? "-"}</td>
         </tr>
     </table>
 
@@ -291,43 +304,43 @@ async function generatePDF(order) {
         <table class="half-table table-1">
             <tr>
                 <td class="label">Gross Weight</td>
-                <td class="value-cell">${order.grossWeight}</td>
+                <td class="value-cell">${order?.grossWeight ?? "-"}</td>
             </tr>
             <tr>
                 <td class="label">Tare Weight</td>
-                <td class="value-cell">${order.tareWeight}</td>
+                <td class="value-cell">${order?.tareWeight ?? "-"}</td>
             </tr>
             <tr>
                 <td class="label">Weighing Loss</td>
-                <td class="value-cell">${order.weighingLoss}</td>
+                <td class="value-cell">${order?.weighingLoss ?? "-"}</td>
             </tr>
             <tr>
                 <td class="label">Container</td>
-                <td class="value-cell">${order.container}</td>
+                <td class="value-cell">${order?.container ?? "-"}</td>
             </tr>
             <tr>
                 <td class="label">Weight Deduction</td>
-                <td class="value-cell">${order.weightDeduction}</td>
+                <td class="value-cell">${order?.weightDeduction ?? "-"}</td>
             </tr>
             <tr>
                 <td class="label">Clean Weight</td>
-                <td class="value-cell">${order.cleanWeight}</td>
+                <td class="value-cell">${order?.cleanWeight ?? "-"}</td>
             </tr>
             <tr>
                 <td class="label">Price</td>
-                <td class="value-cell">${order.price}</td>
+                <td class="value-cell">${order?.price ?? "-"}</td>
             </tr>
             <tr>
                 <td class="label">Total Amount</td>
-                <td class="value-cell">${order.totalAmount}</td>
+                <td class="value-cell">${order?.totalAmount ?? "-"}</td>
             </tr>
             <tr>
                 <td class="label">Labor Charges</td>
-                <td class="value-cell">${order.laborCharges}</td>
+                <td class="value-cell">${order?.laborCharges ?? "-"}</td>
             </tr>
             <tr>
                 <td class="label">Net Amount</td>
-                <td class="value-cell">${order.netAmount}</td>
+                <td class="value-cell">${order?.netAmount ?? "-"}</td>
             </tr>
         </table>
 
@@ -335,19 +348,19 @@ async function generatePDF(order) {
         <table class="half-table table-2">
             <tr>
                 <td class="label">Deduction</td>
-                <td class="value-cell">${order.deduction}</td>
+                <td class="value-cell">${order?.deduction ?? "-"}</td>
             </tr>
             <tr>
                 <td class="label">Air</td>
-                <td class="value-cell">${order.airLoss}</td>
+                <td class="value-cell">${order?.airLoss ?? "-"}</td>
             </tr>
             <tr>
                 <td class="label">Net Deduction</td>
-                <td class="value-cell">${order.netDeduction}</td>
+                <td class="value-cell">${order?.netDeduction ?? "-"}</td>
             </tr>
             <tr>
                 <td class="label">Oil Content Report</td>
-                <td class="value-cell">${order.oilContentReport}</td>
+                <td class="value-cell">${order?.oilContentReport ?? "-"}</td>
             </tr>
         </table>
     </div>
