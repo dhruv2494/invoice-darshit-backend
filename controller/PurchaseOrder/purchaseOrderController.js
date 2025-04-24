@@ -106,7 +106,7 @@ exports.Get = async (req, res, next) => {
 
   try {
     const [rows] = await pool.query(
-      `SELECT po.*, c.name AS customerName, c.email AS email, c.mobile AS mobile 
+      `SELECT po.*, c.name AS customerName, c.address AS address, c.mobile AS mobile 
        FROM purchase_orders po 
        LEFT JOIN customer c ON po.customerId = c.uuid
        ORDER BY po.createdAt DESC`
@@ -125,7 +125,7 @@ exports.GetComplatedPurchaseOrder = async (req, res, next) => {
 
   try {
     const [rows] = await pool.query(
-      `SELECT po.*, c.name AS customerName, c.email AS email, c.mobile AS mobile 
+      `SELECT po.*, c.name AS customerName, c.address AS address, c.mobile AS mobile 
        FROM purchase_orders po 
        LEFT JOIN customer c ON po.customerId = c.uuid
        WHERE po.status = 'completed' 

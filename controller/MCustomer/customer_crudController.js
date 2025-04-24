@@ -3,7 +3,7 @@ const { v4: uuidv4 } = require("uuid");
 
 // Create or Update Customer
 exports.AddUpdate = async (req, res, next) => {
-  const { uuid, email, mobile, name } = req.body;
+  const { uuid, address, mobile, name } = req.body;
   const pool = req.pool;
 
   try {
@@ -20,8 +20,8 @@ exports.AddUpdate = async (req, res, next) => {
 
       // Update customer
       await pool.query(
-        `UPDATE customer SET email = ?, mobile = ?, name = ? WHERE uuid = ?`,
-        [email, mobile, name, uuid]
+        `UPDATE customer SET address = ?, mobile = ?, name = ? WHERE uuid = ?`,
+        [address, mobile, name, uuid]
       );
 
       const [updatedCustomer] = await pool.query(
@@ -35,15 +35,15 @@ exports.AddUpdate = async (req, res, next) => {
         data: updatedCustomer[0],
       });
     } else {
-      // Check for duplicate email
+      // Check for duplicate mobile
       const [rows] = await pool.query(
-        `SELECT email FROM customer WHERE email = ?`,
-        [email]
+        `SELECT mobile FROM customer WHERE mobile = ?`,
+        [mobile]
       );
 
       if (rows.length > 0) {
         return next(
-          new ErrorHandler("Customer with this email already exists!", 400)
+          new ErrorHandler("Customer with this mobile already exists!", 400)
         );
       }
 
@@ -51,9 +51,9 @@ exports.AddUpdate = async (req, res, next) => {
       const newUUID = uuidv4();
 
       await pool.query(
-        `INSERT INTO customer (created_by, mobile, email, uuid, name)
+        `INSERT INTO customer (created_by, mobile, address, uuid, name)
          VALUES (?, ?, ?, ?, ?)`,
-        [req.sUserGUID, mobile, email, newUUID, name]
+        [req.sUserGUID, mobile, address, newUUID, name]
       );
 
       const [newCustomer] = await pool.query(
@@ -91,7 +91,7 @@ exports.Get = async (req, res, next) => {
 
   try {
     const [rows] = await pool.query(
-      `SELECT created_at, created_by, email, uuid, name, mobile FROM customer`
+      `SELECT created_at, created_by, address, uuid, name, mobile FROM customer`
     );
 
     res.status(200).json({ Status: "200", Message: "Success", list: rows });

@@ -146,7 +146,7 @@ exports.Get = async (req, res, next) => {
         i.customerId,
         c.name AS customerName,
         c.mobile,
-        c.email,
+        c.address,
         po.itemName
       FROM invoice i
       LEFT JOIN customer c ON i.customerId = c.uuid
@@ -187,7 +187,7 @@ exports.downloadInvoice = async (req, res, next) => {
         i.oilContentReport,
         c.name AS customerName,
         c.mobile,
-        c.email,
+        c.address,
         po.itemName
       FROM invoice i
       LEFT JOIN customer c ON i.customerId = c.uuid
@@ -292,8 +292,8 @@ async function generatePDF(order) {
             <td>${order?.mobile ?? "-"}</td>
         </tr>
         <tr>
-            <td class="label">Customer Email</td>
-            <td>${order?.email ?? "-"}</td>
+            <td class="label">Customer Address</td>
+            <td>${order?.address ?? "-"}</td>
             <td class="label">Item Name</td>
             <td>${order?.itemName ?? "-"}</td>
         </tr>
