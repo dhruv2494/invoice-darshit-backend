@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
-const purchaseOrderController = require("../../controller/PurchaseOrder/purchaseOrderController"); // ✅ Make sure this path is correct
-const { authTokenMiddleware } = require("../../utils/authMiddleware");
+const purchaseOrderController = require("./../../controller/PurchaseOrder/purchaseOrderController"); // ✅ Make sure this path is correct
+const { authTokenMiddleware } = require("./../../utils/authMiddleware");
 
 router.post("/AddUpdate",authTokenMiddleware, purchaseOrderController.AddUpdate);
 router.delete("/Delete/:uuid",authTokenMiddleware, purchaseOrderController.Delete);

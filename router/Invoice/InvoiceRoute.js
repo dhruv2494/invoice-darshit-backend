@@ -1,13 +1,13 @@
 const express = require("express");
 const router = express.Router();
 
-const { authTokenMiddleware } = require("../../utils/authMiddleware");
+const { authTokenMiddleware } = require("./../../utils/authMiddleware");
 const {
   downloadInvoice,
   AddUpdate,
   Get,
   Delete,
-} = require("../../controller/invoice/invoiceController");
+} = require("./../../controller/Invoice/invoiceController");
 
 router.get(
   "/download-invoice/:purchaseOrderUuid",
