@@ -25,12 +25,12 @@ app.use((req, res, next) => {
   next();
 });
 
-//Routes and error Middleware
-app.use("/", routes);
-app.use(errorMiddleware);
 app.get("/", (req, res) => {
   res.send("Invoice Server Is Running");
 });
+//Routes and error Middleware
+app.use(routes);
+app.use(errorMiddleware);
 //Start the Server
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
