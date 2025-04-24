@@ -12,15 +12,7 @@ const app = express();
 const port = process.env.PORT || 7001;
 
 //CORS to handle credentials + specific origin
-const corsOptions = {
-  origin: "*",
-  credentials: true,
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-};
-app.use(cors(corsOptions));
-
-//Explicitly handle preflight requests
-app.options("*", cors(corsOptions));
+app.use(cors());
 // Body parser and cookie parser
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.json());
