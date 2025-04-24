@@ -9,7 +9,7 @@ const routes = require("./router/index");
 const errorMiddleware = require("./utils/default/globalErrorHandler");
 dotenv.config();
 const app = express();
-const port = 7001;
+const port = process.env.PORT || 7001;
 
 //CORS to handle credentials + specific origin
 const corsOptions = {
@@ -37,7 +37,7 @@ app.use((req, res, next) => {
 app.use("/", routes);
 app.use(errorMiddleware);
 app.get("/", (req, res) => {
-  res.send("Invoice Server Is Running")
+  res.send("Invoice Server Is Running");
 });
 //Start the Server
 app.listen(port, () => {
