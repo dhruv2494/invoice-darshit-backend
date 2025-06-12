@@ -1,7 +1,7 @@
 const ErrorHandler = require("../../utils/default/errorHandler");
-const puppeteer = require("puppeteer");
 const fs = require("fs");
 const { v4: uuidv4 } = require("uuid");
+const pdf = require("html-pdf-node");
 
 exports.AddUpdate = async (req, res, next) => {
   const pool = req.pool;
@@ -107,6 +107,7 @@ exports.AddUpdate = async (req, res, next) => {
     return next(new Error("Failed to create or update invoice"));
   }
 };
+
 exports.Delete = async (req, res, next) => {
   const { uuid } = req.params;
   const pool = req.pool;
@@ -119,6 +120,7 @@ exports.Delete = async (req, res, next) => {
     return next(new ErrorHandler("Error while deleting purchase order!", 500));
   }
 };
+
 exports.Get = async (req, res, next) => {
   const pool = req.pool;
 
@@ -216,9 +218,6 @@ exports.downloadInvoice = async (req, res, next) => {
 };
 
 async function generatePDF(order) {
-  const browser = await puppeteer.launch();
-  const page = await browser.newPage();
-
   const invoiceHTML = `
   <html>
 
@@ -370,14 +369,18 @@ async function generatePDF(order) {
 </html>
   `;
 
-  await page.setContent(invoiceHTML, { waitUntil: "networkidle0" });
-
-  const pdfBuffer = await page.pdf({
+  const file = { content: invoiceHTML };
+  const options = {
     format: "A4",
     printBackground: true,
-    margin: { top: "20mm", bottom: "20mm", left: "15mm", right: "15mm" },
-  });
+    margin: {
+      top: "20mm",
+      bottom: "20mm",
+      left: "15mm",
+      right: "15mm",
+    },
+  };
 
-  await browser.close();
+  const pdfBuffer = await pdf.generatePdf(file, options);
   return pdfBuffer;
 }
