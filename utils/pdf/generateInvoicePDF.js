@@ -2,62 +2,83 @@ const PDFDocument = require('pdfkit');
 
 function generateInvoicePDF(invoiceData) {
     return new Promise((resolve, reject) => {
-        const doc = new PDFDocument({ size: 'A4', margin: 50 });
-        const stream = doc.pipe(Buffer.from([])); // Use a buffer to stream the PDF
+        try {
+            const doc = new PDFDocument({ size: 'A4', margin: 40 });
+            const buffers = [];
+            doc.on('data', buffers.push.bind(buffers));
+            doc.on('end', () => {
+                const pdfData = Buffer.concat(buffers);
+                resolve(pdfData);
+            });
 
-        // Header
-        doc.fontSize(20).text('INVOICE', { align: 'center' });
-        doc.moveDown();
+            // --- HEADER ---
+            doc.fontSize(22).text('INVOICE', { align: 'right' });
+            doc.moveDown(0.5);
+            doc.fontSize(12).text(`Invoice #: ${invoiceData.invoice_number}`, { align: 'right' });
+            doc.text(`Date: ${new Date(invoiceData.date).toLocaleDateString()}`, { align: 'right' });
+            doc.text(`Status: ${invoiceData.status || ''}`, { align: 'right' });
 
-        // Company and Customer Info
-        const customer = invoiceData.customer || {};
-        doc.fontSize(12).text(`Invoice Number: ${invoiceData.invoice_number}`, { align: 'right' });
-        doc.text(`Date: ${new Date(invoiceData.date).toLocaleDateString()}`, { align: 'right' });
-        doc.moveDown();
-        doc.text('Bill To:', { underline: true });
-        doc.text(customer.name || 'N/A');
-        doc.text(customer.email || '');
-        doc.text(customer.address || '');
-        doc.moveDown(2);
+            // --- CUSTOMER INFO ---
+            doc.moveDown(1.5);
+            doc.fontSize(14).text('Bill To:', { underline: true });
+            const customer = invoiceData.customer || {};
+            doc.fontSize(12)
+                .text(customer.name || 'N/A')
+                .text(customer.address || '')
+                .text(`${customer.city || ''}, ${customer.state || ''} ${customer.pincode || ''}`)
+                .text(`GST: ${customer.gst_number || '-'}`)
+                .text(`Email: ${customer.email || '-'}`)
+                .text(`Phone: ${customer.phone || '-'}`);
 
-        // Table Header
-        const tableTop = doc.y;
-        doc.fontSize(10);
-        doc.text('Description', 50, tableTop);
-        doc.text('Quantity', 280, tableTop, { width: 90, align: 'right' });
-        doc.text('Unit Price', 370, tableTop, { width: 90, align: 'right' });
-        doc.text('Total', 0, tableTop, { align: 'right' });
-        doc.moveTo(50, tableTop + 20).lineTo(550, tableTop + 20).stroke();
+            // --- ITEMS TABLE HEADER ---
+            doc.moveDown(1.5);
+            doc.fontSize(13).text('Invoice Items:', { underline: true });
+            doc.moveDown(0.5);
 
-        // Table Rows
-        let y = tableTop + 30;
-        invoiceData.items.forEach(item => {
-            doc.text(item.description, 50, y);
-            doc.text(item.quantity.toString(), 280, y, { width: 90, align: 'right' });
-            doc.text(`$${item.unit_price.toFixed(2)}`, 370, y, { width: 90, align: 'right' });
-            doc.text(`$${(item.quantity * item.unit_price).toFixed(2)}`, 0, y, { align: 'right' });
-            y += 20;
-        });
-        doc.moveTo(50, y).lineTo(550, y).stroke();
-        doc.moveDown();
+            // Table Header
+            doc.font('Helvetica-Bold');
+            doc.text('Item', 40, doc.y, { continued: true, width: 100 });
+            doc.text('Gross', 150, doc.y, { continued: true, width: 50 });
+            doc.text('Tare', 200, doc.y, { continued: true, width: 50 });
+            doc.text('Net', 250, doc.y, { continued: true, width: 50 });
+            doc.text('Clean', 300, doc.y, { continued: true, width: 50 });
+            doc.text('Price', 350, doc.y, { continued: true, width: 50 });
+            doc.text('Total', 400, doc.y, { width: 80 });
+            doc.moveDown(0.2);
+            doc.font('Helvetica');
 
-        // Total
-        doc.fontSize(12).text(`Total: $${invoiceData.total_amount.toFixed(2)}`, { align: 'right' });
+            // Table Rows
+            (invoiceData.items || []).forEach((item, idx) => {
+                doc.text(item.item_name, 40, doc.y, { continued: true, width: 100 });
+                doc.text(item.gross_weight, 150, doc.y, { continued: true, width: 50 });
+                doc.text(item.tare_weight, 200, doc.y, { continued: true, width: 50 });
+                doc.text(item.net_weight, 250, doc.y, { continued: true, width: 50 });
+                doc.text(item.clean_weight, 300, doc.y, { continued: true, width: 50 });
+                doc.text(item.price, 350, doc.y, { continued: true, width: 50 });
+                doc.text(item.total_amount, 400, doc.y, { width: 80 });
+                doc.moveDown(0.2);
+            });
 
-        // Footer
-        doc.fontSize(8).text('Thank you for your business!', 50, 780, { align: 'center', width: 500 });
+            // --- TOTALS, NOTES, TERMS ---
+            doc.moveDown(1.5);
+            doc.font('Helvetica-Bold').text(`Total Amount: ₹${invoiceData.total_amount}`, { align: 'right' });
+            doc.font('Helvetica').moveDown(0.5);
+            if (invoiceData.notes) {
+                doc.text(`Notes: ${invoiceData.notes}`);
+            }
+            if (invoiceData.terms_conditions) {
+                doc.text(`Terms: ${invoiceData.terms_conditions}`);
+            }
 
-        doc.end();
+            // --- FOOTER ---
+            doc.moveDown(2);
+            doc.fontSize(10).text('Thank you for your business!', { align: 'center' });
 
-        // Collect buffers
-        const buffers = [];
-        stream.on('data', buffers.push.bind(buffers));
-        stream.on('end', () => {
-            const pdfData = Buffer.concat(buffers);
-            resolve(pdfData);
-        });
-        stream.on('error', reject);
+            doc.end();
+        } catch (err) {
+            reject(err);
+        }
     });
 }
 
-module.exports = { generateInvoicePDF };
+module.exports = generateInvoicePDF;

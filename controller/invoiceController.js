@@ -176,7 +176,7 @@ const ErrorHandler = require('../utils/default/errorHandler');
 //   }
 // };
 
-const { generateInvoicePDF } = require('../utils/pdf/generateInvoicePDF');
+const generateInvoicePDF = require('../utils/pdf/generateInvoicePDF');
 
 /**
  * @description Create a new invoice
@@ -372,34 +372,28 @@ exports.deleteInvoice = async (req, res, next) => {
  * @route GET /api/invoices/:id/download
  * @access Private
  */
+
 exports.downloadInvoicePDF = async (req, res, next) => {
     try {
         const pool = req.pool;
         const [invoice_rows] = await pool.query('SELECT * FROM invoices WHERE id = ?', [req.params.id]);
-
         if (invoice_rows.length === 0) {
             return next(new ErrorHandler('Invoice not found', 404));
         }
-
         const [item_rows] = await pool.query('SELECT * FROM invoice_items WHERE invoice_id = ?', [req.params.id]);
         const [customer_rows] = await pool.query('SELECT * FROM customers WHERE id = ?', [invoice_rows[0].customer_id]);
-
-        const invoiceData = { 
-            ...invoice_rows[0], 
+        const invoiceData = {
+            ...invoice_rows[0],
             items: item_rows,
             customer: customer_rows[0]
         };
-
-        const pdfStream = await generateInvoicePDF(invoiceData);
-
+        // Generate PDF buffer
+        const pdfBuffer = await generateInvoicePDF(invoiceData);
         res.setHeader('Content-Type', 'application/pdf');
-        res.setHeader('Content-Disposition', `attachment; filename=invoice-${invoiceData.invoice_number}.pdf`);
-
-        pdfStream.pipe(res);
-        pdfStream.end();
-
+        res.setHeader('Content-Disposition', `attachment; filename=Invoice_${invoiceData.invoice_number}.pdf`);
+        res.send(pdfBuffer);
     } catch (error) {
-        console.error('Download Invoice Error:', error);
+        console.error('Download Invoice PDF Error:', error);
         return next(new ErrorHandler('Server Error', 500));
     }
 };
