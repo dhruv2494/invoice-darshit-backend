@@ -1,16 +1,19 @@
-const express = require("express");
+const express = require('express');
 const router = express.Router();
 
-const customer_crudRoute = require("./MCustomer/customer_crudRoute");
-const poRoute = require("./PurchaseOrder/poRoute");
-const invoice_Route = require("./Invoice/InvoiceRoute");
-const customerDetailsRoute = require("./customerDetails/customerDetailsRoute");
-const userRoute = require("./userRoute");
+// Import routes
+const userRoute = require('./userRoute');
+const customerRoute = require('./customerRoute');
+const purchaseOrderRoute = require('./purchaseOrderRoute');
+const invoiceRoute = require('./invoiceRoute');
 
-router.use("/customercrud", customer_crudRoute);
-router.use("/invoice", invoice_Route);
-router.use("/po", poRoute);
-router.use("/user", userRoute);
-router.use("/customer-details", customerDetailsRoute);
+// Mount routers
+router.use('/api/auth', userRoute);
+router.use('/api/customers', customerRoute);
+router.use('/api/purchase-orders', purchaseOrderRoute);
+router.use('/api/invoices', invoiceRoute);
 
 module.exports = router;
+
+
+
