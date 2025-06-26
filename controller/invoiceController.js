@@ -387,11 +387,12 @@ exports.downloadInvoicePDF = async (req, res, next) => {
             items: item_rows,
             customer: customer_rows[0]
         };
-        // Generate PDF buffer
         const pdfBuffer = await generateInvoicePDF(invoiceData);
         res.setHeader('Content-Type', 'application/pdf');
         res.setHeader('Content-Disposition', `attachment; filename=Invoice_${invoiceData.invoice_number}.pdf`);
-        res.send(pdfBuffer);
+        res.setHeader('Content-Length', pdfBuffer.length);
+        res.end(pdfBuffer); // ✅ use end() for binary data
+        
     } catch (error) {
         console.error('Download Invoice PDF Error:', error);
         return next(new ErrorHandler('Server Error', 500));

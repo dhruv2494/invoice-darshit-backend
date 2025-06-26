@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jun 24, 2025 at 05:51 PM
+-- Generation Time: Jun 26, 2025 at 07:59 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -81,7 +81,9 @@ CREATE TABLE `invoice_items` (
   `air_loss` decimal(15,2) DEFAULT 0.00,
   `net_deduction` decimal(15,2) GENERATED ALWAYS AS (`deduction` + `air_loss`) STORED,
   `total_amount` decimal(15,2) GENERATED ALWAYS AS (`clean_weight` * `price` + `labor_charges` - `net_deduction`) STORED,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `description` varchar(255) DEFAULT NULL,
+  `quantity` decimal(10,2) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
