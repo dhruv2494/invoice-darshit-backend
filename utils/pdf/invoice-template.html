@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Invoice</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Roboto', Arial, sans-serif;
+      background: #f8f9fa;
+      margin: 0;
+      padding: 0;
+      color: #22223b;
+    }
+    .invoice-box {
+      background: #fff;
+      max-width: 900px;
+      margin: 40px auto;
+      box-shadow: 0 6px 24px rgba(34,34,59,0.09);
+      border-radius: 16px;
+      padding: 38px 48px 32px 48px;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      border-bottom: 3px solid #4a4e69;
+      padding-bottom: 18px;
+      margin-bottom: 28px;
+    }
+    .company {
+      font-size: 2.1rem;
+      font-weight: 700;
+      letter-spacing: 2px;
+      color: #4a4e69;
+    }
+    .invoice-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #22223b;
+      text-align: right;
+    }
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 28px;
+      gap: 24px;
+    }
+    .info-box {
+      background: #f4f4fa;
+      border-radius: 10px;
+      padding: 18px 26px;
+      width: 48%;
+      box-sizing: border-box;
+      border: 1.5px solid #e0e0e0;
+    }
+    .info-box h4 {
+      margin: 0 0 10px 0;
+      font-size: 1.05rem;
+      color: #4a4e69;
+      font-weight: 700;
+    }
+    .info-box p {
+      margin: 4px 0;
+      font-size: 1rem;
+    }
+    .invoice-meta {
+      margin-bottom: 28px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 30px;
+    }
+    .meta-item {
+      min-width: 140px;
+      font-size: 1rem;
+      color: #4a4e69;
+    }
+    .items-list {
+      margin-bottom: 24px;
+    }
+    .item-card {
+      border: 1.5px solid #e0e0e0;
+      border-radius: 10px;
+      padding: 18px 20px 12px 20px;
+      margin-bottom: 18px;
+      background: #f8f7fa;
+      box-shadow: 0 2px 10px rgba(34,34,59,0.03);
+    }
+    .item-top {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 18px;
+      align-items: baseline;
+      font-size: 1.08rem;
+      margin-bottom: 10px;
+    }
+    .item-name {
+      color: #22223b;
+      font-weight: 700;
+      font-size: 1.08rem;
+    }
+    .item-desc {
+      color: #6c757d;
+      font-size: 1.01rem;
+      font-style: italic;
+    }
+    .item-qty, .item-container {
+      color: #4a4e69;
+      font-size: 0.98rem;
+    }
+    .item-details {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 18px 32px;
+      margin-bottom: 8px;
+      font-size: 0.98rem;
+    }
+    .item-group {
+      min-width: 120px;
+      margin-bottom: 4px;
+    }
+    .item-bottom {
+      margin-top: 10px;
+      text-align: right;
+    }
+    .item-total {
+      color: #22223b;
+      font-size: 1.08rem;
+      font-weight: 700;
+      background: #e9ecef;
+      padding: 4px 18px;
+      border-radius: 6px;
+    }
+    .total-row-block {
+      margin-top: 18px;
+      text-align: right;
+      font-size: 1.13rem;
+      font-weight: 700;
+      color: #fff;
+      background: #4a4e69;
+      padding: 10px 0 10px 0;
+      border-radius: 8px;
+      letter-spacing: 1px;
+    }
+    .notes {
+      background: #f4f4fa;
+      border-radius: 8px;
+      padding: 14px 22px;
+      margin-top: 22px;
+      color: #22223b;
+      border: 1.5px solid #e0e0e0;
+    }
+    .footer {
+      text-align: center;
+      color: #adb5bd;
+      font-size: 1.01rem;
+      margin-top: 38px;
+      border-top: 1.5px solid #e0e0e0;
+      padding-top: 14px;
+    }
+    @media (max-width: 700px) {
+      .invoice-box {
+        padding: 16px 4px;
+      }
+      .info-row {
+        flex-direction: column;
+        gap: 14px;
+      }
+      .info-box {
+        width: 100%;
+      }
+      .item-details {
+        gap: 10px 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="invoice-box">
+    <div class="header">
+      <div class="company">Your Company Name</div>
+      <div class="invoice-title">
+        INVOICE<br />
+        <span style="font-size:1rem;font-weight:400;">#INV-XXXXXX</span>
+      </div>
+    </div>
+
+    <div class="info-row">
+      <div class="info-box">
+        <h4>Bill To</h4>
+        <p><b>Name:</b> Hellowwwwwww</p>
+        <p><b>Address:</b> hujeeee</p>
+        <p><b>City/State:</b> huheeeee, kjijeeee 777444</p>
+        <p><b>GST:</b> 65454545454</p>
+        <p><b>Email:</b> hello1@yopmail.com</p>
+        <p><b>Phone:</b> 54684777777777</p>
+      </div>
+      <div class="info-box">
+        <h4>Invoice Info</h4>
+        <p><b>Invoice #:</b> INV-1750880293183</p>
+        <p><b>PO #:</b> 03c66b64-b228-4579-af41-066ca8326503</p>
+        <p><b>Date:</b> 01/10/1991</p>
+        <p><b>Status:</b> Draft</p>
+        <p><b>Total:</b> ₹65.00</p>
+      </div>
+    </div>
+
+    <div class="invoice-meta">
+      <div class="meta-item"><b>Created At:</b> 25/06/2025</div>
+      <div class="meta-item"><b>Customer Since:</b> 23/06/2025</div>
+    </div>
+
+    <div class="items-list">
+      <h3 style="margin-top:0; margin-bottom:10px; color:#4a4e69; font-size:1.15rem;">Invoice Items</h3>
+      <!-- Example for each item -->
+      <div class="item-card">
+        <div class="item-top">
+          <span class="item-name"><b>Echo Duffy</b></span>
+          <span class="item-desc">-</span>
+          <span class="item-qty">Qty: 45</span>
+          <span class="item-container">Container: Exercitation volupta</span>
+        </div>
+        <div class="item-details">
+          <div class="item-group"><b>Gross:</b> 95.00</div>
+          <div class="item-group"><b>Tare:</b> 87.00</div>
+          <div class="item-group"><b>Net:</b> 8.00</div>
+          <div class="item-group"><b>Weighing Loss:</b> 67.00</div>
+          <div class="item-group"><b>Clean:</b> 89.00</div>
+          <div class="item-group"><b>Price:</b> 222.00</div>
+          <div class="item-group"><b>Labor Charges:</b> 93.00</div>
+          <div class="item-group"><b>Deduction:</b> 22.00</div>
+          <div class="item-group"><b>Air Loss:</b> 36.00</div>
+          <div class="item-group"><b>Net Deduction:</b> 58.00</div>
+        </div>
+        <div class="item-bottom">
+          <span class="item-total"><b>Total:</b> ₹19793.00</span>
+        </div>
+      </div>
+      <div class="item-card">
+        <div class="item-top">
+          <span class="item-name"><b>hggfy</b></span>
+          <span class="item-desc">-</span>
+          <span class="item-qty">Qty: 45</span>
+          <span class="item-container">Container: fff voluvvpta</span>
+        </div>
+        <div class="item-details">
+          <div class="item-group"><b>Gross:</b> 950.00</div>
+          <div class="item-group"><b>Tare:</b> 847.00</div>
+          <div class="item-group"><b>Net:</b> 85.00</div>
+          <div class="item-group"><b>Weighing Loss:</b> 2.00</div>
+          <div class="item-group"><b>Clean:</b> 829.00</div>
+          <div class="item-group"><b>Price:</b> 45.00</div>
+          <div class="item-group"><b>Labor Charges:</b> 55.00</div>
+          <div class="item-group"><b>Deduction:</b> 1.00</div>
+          <div class="item-group"><b>Air Loss:</b> 364.00</div>
+          <div class="item-group"><b>Net Deduction:</b> 548.00</div>
+        </div>
+        <div class="item-bottom">
+          <span class="item-total"><b>Total:</b> ₹456.00</span>
+        </div>
+      </div>
+      <div class="total-row-block">
+        Grand Total: ₹65.00
+      </div>
+    </div>
+
+    <div class="notes">
+      <b>Notes / Terms:</b> <br />
+      <!-- Add notes or terms here if any -->
+      <span style="color:#888;">No notes or terms provided.</span>
+    </div>
+
+    <div class="footer">
+      Thank you for your business!<br />
+      Generated on 26/06/2025 &nbsp; | &nbsp; Page 1 of 1
+    </div>
+  </div>
+</body>
+</html>
+
+
