@@ -205,8 +205,8 @@ exports.createInvoice = async (req, res, next) => {
       return pool.query(
         `INSERT INTO invoice_items (
           id, invoice_id, item_name, gross_weight, tare_weight, weighing_loss, clean_weight, container, 
-          price, labor_charges, deduction, air_loss, total_amount
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          price, labor_charges, deduction, air_loss
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           item_id,
           id,
@@ -219,8 +219,7 @@ exports.createInvoice = async (req, res, next) => {
           item.price,
           item.labor_charges,
           item.deduction,
-          item.air_loss,
-          item.total_amount
+          item.air_loss
         ]
       );
     });
@@ -327,8 +326,8 @@ exports.updateInvoice = async (req, res, next) => {
       return pool.query(
         `INSERT INTO invoice_items (
           id, invoice_id, item_name, gross_weight, tare_weight, weighing_loss, clean_weight, container, 
-          price, labor_charges, deduction, air_loss, total_amount
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          price, labor_charges, deduction, air_loss
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ON DUPLICATE KEY UPDATE
           item_name = VALUES(item_name),
           gross_weight = VALUES(gross_weight),
@@ -339,8 +338,7 @@ exports.updateInvoice = async (req, res, next) => {
           price = VALUES(price),
           labor_charges = VALUES(labor_charges),
           deduction = VALUES(deduction),
-          air_loss = VALUES(air_loss),
-          total_amount = VALUES(total_amount)`,
+          air_loss = VALUES(air_loss)`,
         [
           item_id,
           req.params.id,
@@ -353,8 +351,7 @@ exports.updateInvoice = async (req, res, next) => {
           item.price,
           item.labor_charges,
           item.deduction,
-          item.air_loss,
-          item.total_amount
+          item.air_loss
         ]
       );
     });
