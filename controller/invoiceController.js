@@ -193,10 +193,11 @@ exports.createInvoice = async (req, res, next) => {
   try {
     const pool = req.pool;
     const id = uuidv4();
+    const invoiceDate = new Date(date).toISOString().slice(0, 19).replace('T', ' ');
 
     await pool.query(
       'INSERT INTO invoices (id, customer_id, po_id, invoice_number, date, total_amount) VALUES (?, ?, ?, ?, ?, ?)',
-      [id, customer_id, po_id, invoice_number, date, total_amount]
+      [id, customer_id, po_id, invoice_number, invoiceDate, total_amount]
     );
 
     const itemPromises = items.map(item => {
@@ -281,11 +282,13 @@ exports.updateInvoice = async (req, res, next) => {
 
   try {
     const pool = req.pool;
-
+    const invoiceDate = new Date(date).toISOString().slice(0, 19).replace('T', ' ');
+    // Use `invoiceDate` in your SQL query or ORM update
+    
     // Step 1: Update the invoice header
     const [result] = await pool.query(
       'UPDATE invoices SET customer_id = ?, po_id = ?, invoice_number = ?, date = ?, total_amount = ? WHERE id = ?',
-      [customer_id, po_id, invoice_number, date, total_amount, req.params.id]
+      [customer_id, po_id, invoice_number, invoiceDate, total_amount, req.params.id]
     );
 
     if (result.affectedRows === 0) {
