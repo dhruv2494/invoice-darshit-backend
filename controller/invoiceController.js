@@ -203,7 +203,10 @@ exports.createInvoice = async (req, res, next) => {
     const itemPromises = items.map(item => {
       const item_id = uuidv4();
       return pool.query(
-        'INSERT INTO invoice_items (id, invoice_id, item_name, gross_weight, tare_weight, weighing_loss, clean_weight, container, price, labor_charges, deduction, air_loss, net_deduction, total_amount) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+        `INSERT INTO invoice_items (
+          id, invoice_id, item_name, gross_weight, tare_weight, weighing_loss, clean_weight, container, 
+          price, labor_charges, deduction, air_loss, total_amount
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           item_id,
           id,
@@ -217,7 +220,6 @@ exports.createInvoice = async (req, res, next) => {
           item.labor_charges,
           item.deduction,
           item.air_loss,
-          item.net_deduction,
           item.total_amount
         ]
       );
@@ -300,7 +302,6 @@ exports.updateInvoice = async (req, res, next) => {
     const pool = req.pool;
     const invoiceDate = new Date(date).toISOString().slice(0, 19).replace('T', ' ');
 
-    // Step 1: Update invoice
     const [result] = await pool.query(
       'UPDATE invoices SET customer_id = ?, po_id = ?, invoice_number = ?, date = ?, total_amount = ? WHERE id = ?',
       [customer_id, po_id, invoice_number, invoiceDate, total_amount, req.params.id]
@@ -310,7 +311,6 @@ exports.updateInvoice = async (req, res, next) => {
       return next(new ErrorHandler('Invoice not found', 404));
     }
 
-    // Step 2: Delete removed invoice items
     const passedItemIds = items.map(item => item.id).filter(Boolean);
 
     if (passedItemIds.length > 0) {
@@ -322,14 +322,13 @@ exports.updateInvoice = async (req, res, next) => {
       await pool.query('DELETE FROM invoice_items WHERE invoice_id = ?', [req.params.id]);
     }
 
-    // Step 3: Insert or update each item (without net_weight)
     const itemPromises = items.map(item => {
       const item_id = item.id || uuidv4();
       return pool.query(
         `INSERT INTO invoice_items (
-          id, invoice_id, item_name, gross_weight, tare_weight, weighing_loss, clean_weight, container, price,
-          labor_charges, deduction, air_loss, net_deduction, total_amount
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          id, invoice_id, item_name, gross_weight, tare_weight, weighing_loss, clean_weight, container, 
+          price, labor_charges, deduction, air_loss, total_amount
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ON DUPLICATE KEY UPDATE
           item_name = VALUES(item_name),
           gross_weight = VALUES(gross_weight),
@@ -341,7 +340,6 @@ exports.updateInvoice = async (req, res, next) => {
           labor_charges = VALUES(labor_charges),
           deduction = VALUES(deduction),
           air_loss = VALUES(air_loss),
-          net_deduction = VALUES(net_deduction),
           total_amount = VALUES(total_amount)`,
         [
           item_id,
@@ -356,7 +354,6 @@ exports.updateInvoice = async (req, res, next) => {
           item.labor_charges,
           item.deduction,
           item.air_loss,
-          item.net_deduction,
           item.total_amount
         ]
       );
@@ -364,13 +361,13 @@ exports.updateInvoice = async (req, res, next) => {
 
     await Promise.all(itemPromises);
 
-    // Step 4: Return success
     res.status(200).json({ success: true, message: 'Invoice updated successfully' });
   } catch (error) {
     console.error('Update Invoice Error:', error);
     return next(new ErrorHandler('Server Error', 500));
   }
 };
+
 
 
 /**
