@@ -7,7 +7,8 @@ async function generateInvoicePDF(invoiceData) {
     const htmlContent = generateHtml(invoiceData);
 
     const browser = await puppeteer.launch({
-      headless: 'new', 
+      headless: true,
+      executablePath: process.env.CHROME_EXECUTABLE_PATH || undefined,
       args: ['--no-sandbox', '--disable-setuid-sandbox']
     });
 
