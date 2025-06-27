@@ -1,6 +1,7 @@
 const { v4: uuidv4 } = require('uuid');
 const ErrorHandler = require('../utils/default/errorHandler');
 const bcrypt = require('bcryptjs');
+const recentActivitiesStatus = require('../utils/enum');
 
 exports.getProfile = async (req, res, next) => {
   try {
@@ -30,6 +31,10 @@ exports.updateProfile = async (req, res, next) => {
     const pool = req.pool;
     const [rows] = await pool.query(`
       UPDATE users SET name = ?, email = ?, phone = ?, address = ?, company = ? WHERE id = ?`, [name, email, phone, address, company, req.user.id]);
+      await pool.query(
+        'INSERT INTO recent_activities (id, user_id, title, status) VALUES (UUID(), ?, ?, ?)',
+        [req.user.id, 'Profile updated successfully', recentActivitiesStatus?.UPDATED]
+      );
     res.status(200).json({ success: true, data: rows });
   } catch (error) {
     console.error('Update Profile Error:', error);
@@ -53,6 +58,10 @@ exports.updatePassword = async (req, res, next) => {
     const salt = await bcrypt.genSalt(10);
     const password_hash = await bcrypt.hash(newPassword, salt);
     const [updatedRows] = await pool.query(`UPDATE users SET password_hash = ? WHERE id = ?`, [password_hash, req.user.id]);
+    await pool.query(
+      'INSERT INTO recent_activities (id, user_id, title, status) VALUES (UUID(), ?, ?, ?)',
+      [req.user.id, 'Password updated successfully', recentActivitiesStatus?.UPDATED]
+    );
     res.status(200).json({ success: true, data: updatedRows });
   } catch (error) {
     console.error('Update Password Error:', error);

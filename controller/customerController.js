@@ -1,5 +1,6 @@
 const { v4: uuidv4 } = require('uuid');
 const ErrorHandler = require('../utils/default/errorHandler');
+const recentActivitiesStatus = require('../utils/enum');
 
 // Helper to map database rows to a frontend-friendly object
 const mapCustomerData = (dbRow, purchaseOrders, invoices) => ({
@@ -49,7 +50,10 @@ exports.createCustomer = async (req, res, next) => {
       'INSERT INTO customers (id, name, email, phone, address, gst_number, city, state, pincode) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
       [id, name, email, mobile, address, gstNumber, city, state, pincode]
     );
-
+    await pool.query(
+      'INSERT INTO recent_activities (id, user_id, title, status) VALUES (UUID(), ?, ?, ?)',
+      [req.user.id, 'Customer created successfully', recentActivitiesStatus?.NEW]
+    );
     res.status(201).json({ success: true, message: 'Customer created successfully', data: mapCustomerData(newCustomer) });
   } catch (error) {
     console.error('Create Customer Error:', error);
@@ -112,7 +116,10 @@ exports.updateCustomer = async (req, res, next) => {
       'UPDATE customers SET name = ?, email = ?, phone = ?, address = ?, gst_number = ?, city = ?, state = ?, pincode = ? WHERE id = ?',
       [name, email, mobile, address, gstNumber, city, state, pincode, req.params.id]
     );
-
+    await pool.query(
+      'INSERT INTO recent_activities (id, user_id, title, status) VALUES (UUID(), ?, ?, ?)',
+      [req.user.id, 'Customer updated successfully', recentActivitiesStatus?.UPDATED]
+    );
     if (result.affectedRows === 0) {
       return next(new ErrorHandler('Customer not found', 404));
     }
@@ -133,7 +140,10 @@ exports.deleteCustomer = async (req, res, next) => {
   try {
     const pool = req.pool;
     const [result] = await pool.query('DELETE FROM customers WHERE id = ?', [req.params.id]);
-
+    await pool.query(
+      'INSERT INTO recent_activities (id, user_id, title, status) VALUES (UUID(), ?, ?, ?)',
+      [req.user.id, 'Customer deleted successfully', recentActivitiesStatus?.DELETED]
+    );
     if (result.affectedRows === 0) {
       return next(new ErrorHandler('Customer not found', 404));
     }

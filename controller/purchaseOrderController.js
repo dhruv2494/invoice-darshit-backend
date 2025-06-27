@@ -1,5 +1,6 @@
 const { v4: uuidv4 } = require('uuid');
 const ErrorHandler = require('../utils/default/errorHandler');
+const recentActivitiesStatus = require('../utils/enum');
 
 const mapPoData = (po, items, customerRows) => ({
   id: po.id,
@@ -49,7 +50,10 @@ exports.createPurchaseOrder = async (req, res, next) => {
         id: uuidv4(), po_id: poId, productName,description, quantity, unit_price: unitPrice, tax_rate: taxRate
       });
     });
-
+    await connection.query(
+      'INSERT INTO recent_activities (id, user_id, title, status) VALUES (UUID(), ?, ?, ?)',
+      [req.user.id, 'Purchase Order created successfully', recentActivitiesStatus?.NEW]
+    );
     await Promise.all(itemPromises);
     await connection.commit();
 
@@ -126,7 +130,10 @@ exports.updatePurchaseOrder = async (req, res, next) => {
         id: uuidv4(), po_id: id, productName,description, quantity, unit_price: unitPrice, tax_rate: taxRate
       });
     });
-
+    await connection.query(
+      'INSERT INTO recent_activities (id, user_id, title, status) VALUES (UUID(), ?, ?, ?)',
+      [req.user.id, 'Purchase Order updated successfully', recentActivitiesStatus?.UPDATED]
+    );
     await Promise.all(itemPromises);
     await connection.commit();
 
@@ -148,7 +155,10 @@ exports.deletePurchaseOrder = async (req, res, next) => {
     await connection.query('DELETE FROM po_items WHERE po_id = ?', [req.params.id]);
     const [result] = await connection.query('DELETE FROM purchase_orders WHERE id = ?', [req.params.id]);
     await connection.commit();
-
+    await connection.query(
+      'INSERT INTO recent_activities (id, user_id, title, status) VALUES (UUID(), ?, ?, ?)',
+      [req.user.id, 'Purchase Order deleted successfully', recentActivitiesStatus?.DELETED]
+    );
     if (result.affectedRows === 0) {
       return next(new ErrorHandler('Purchase order not found', 404));
     }

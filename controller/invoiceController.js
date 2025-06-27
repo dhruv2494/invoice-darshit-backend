@@ -177,6 +177,7 @@ const ErrorHandler = require('../utils/default/errorHandler');
 // };
 
 const generateInvoicePDF = require('../utils/pdf/generateInvoicePDF');
+const recentActivitiesStatus = require('../utils/enum');
 
 /**
  * @description Create a new invoice
@@ -225,7 +226,10 @@ exports.createInvoice = async (req, res, next) => {
     });
 
     await Promise.all(itemPromises);
-
+    await pool.query(
+      'INSERT INTO recent_activities (id, user_id, title, status) VALUES (UUID(), ?, ?, ?)',
+      [req.user.id, 'Invoice created successfully', recentActivitiesStatus?.NEW]
+    );
     res.status(201).json({ success: true, message: 'Invoice created successfully', data: { id } });
   } catch (error) {
     console.error('Create Invoice Error:', error);
@@ -357,7 +361,10 @@ exports.updateInvoice = async (req, res, next) => {
     });
 
     await Promise.all(itemPromises);
-
+    await pool.query(
+      'INSERT INTO recent_activities (id, user_id, title, status) VALUES (UUID(), ?, ?, ?)',
+      [req.user.id, 'Invoice updated successfully', recentActivitiesStatus?.UPDATED]
+    );
     res.status(200).json({ success: true, message: 'Invoice updated successfully' });
   } catch (error) {
     console.error('Update Invoice Error:', error);
@@ -380,7 +387,10 @@ exports.deleteInvoice = async (req, res, next) => {
     if (result.affectedRows === 0) {
       return next(new ErrorHandler('Invoice not found', 404));
     }
-
+    await pool.query(
+      'INSERT INTO recent_activities (id, user_id, title, status) VALUES (UUID(), ?, ?, ?)',
+      [req.user.id, 'Invoice deleted successfully', recentActivitiesStatus?.DELETED]
+    );
     res.status(200).json({ success: true, message: 'Invoice deleted successfully' });
   } catch (error) {
     console.error('Delete Invoice Error:', error);
@@ -408,6 +418,10 @@ exports.downloadInvoicePDF = async (req, res, next) => {
             items: item_rows,
             customer: customer_rows[0]
         };
+        await pool.query(
+          'INSERT INTO recent_activities (id, user_id, title, status) VALUES (UUID(), ?, ?, ?)',
+          [req.user.id, 'Invoice downloaded successfully', recentActivitiesStatus?.COMPLETED]
+        );
         const pdfBuffer = await generateInvoicePDF(invoiceData);
         res.setHeader('Content-Type', 'application/pdf');
         res.setHeader('Content-Disposition', `attachment; filename=Invoice_${invoiceData.invoice_number}.pdf`);

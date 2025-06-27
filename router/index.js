@@ -7,13 +7,14 @@ const customerRoute = require('./customerRoute');
 const purchaseOrderRoute = require('./purchaseOrderRoute');
 const invoiceRoute = require('./invoiceRoute');
 const profileRoute = require('./profileRoute');
-
+const dashboardRoute = require('./dashboardRoute');
 // Mount routers
 router.use('/api/auth', userRoute);
 router.use('/api/customers', customerRoute);
 router.use('/api/purchase-orders', purchaseOrderRoute);
 router.use('/api/invoices', invoiceRoute);
 router.use('/api/profile', profileRoute);
+router.use('/api/dashboard', dashboardRoute);
 
 module.exports = router;
 
