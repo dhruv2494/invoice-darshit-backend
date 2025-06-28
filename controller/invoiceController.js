@@ -205,22 +205,26 @@ exports.createInvoice = async (req, res, next) => {
       const item_id = uuidv4();
       return pool.query(
         `INSERT INTO invoice_items (
-          id, invoice_id, item_name, gross_weight, tare_weight, weighing_loss, clean_weight, container, 
-          price, labor_charges, deduction, air_loss
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          id, invoice_id, item_name, quantity, gross_weight, tare_weight, net_weight, weighing_loss, clean_weight, container, 
+          price, labor_charges, deduction, air_loss, net_deduction, total_amount
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           item_id,
           id,
           item.item_name,
+          item.quantity,
           item.gross_weight,
           item.tare_weight,
+          item.net_weight,
           item.weighing_loss,
           item.clean_weight,
           item.container,
           item.price,
           item.labor_charges,
           item.deduction,
-          item.air_loss
+          item.air_loss,
+          item.net_deduction,
+          item.total_amount
         ]
       );
     });
@@ -299,15 +303,15 @@ exports.getInvoiceById = async (req, res, next) => {
  * @access Private
  */
 exports.updateInvoice = async (req, res, next) => {
-  const { customer_id, po_id, invoice_number, date, total_amount, items } = req.body;
+  const { customer_id, po_id, invoice_number, date, total_amount, items,status,terms,notes } = req.body;
 
   try {
     const pool = req.pool;
     const invoiceDate = new Date(date).toISOString().slice(0, 19).replace('T', ' ');
 
     const [result] = await pool.query(
-      'UPDATE invoices SET customer_id = ?, po_id = ?, invoice_number = ?, date = ?, total_amount = ? WHERE id = ?',
-      [customer_id, po_id, invoice_number, invoiceDate, total_amount, req.params.id]
+      'UPDATE invoices SET customer_id = ?, po_id = ?, invoice_number = ?, date = ?, total_amount = ?,status = ?,terms_conditions = ?,notes = ? WHERE id = ?',
+      [customer_id, po_id, invoice_number, invoiceDate, total_amount,status,terms,notes, req.params.id]
     );
 
     if (result.affectedRows === 0) {
@@ -329,36 +333,45 @@ exports.updateInvoice = async (req, res, next) => {
       const item_id = item.id || uuidv4();
       return pool.query(
         `INSERT INTO invoice_items (
-          id, invoice_id, item_name, gross_weight, tare_weight, weighing_loss, clean_weight, container, 
-          price, labor_charges, deduction, air_loss
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          id, invoice_id, item_name,quantity, gross_weight, tare_weight, net_weight, weighing_loss, clean_weight, container, 
+          price, labor_charges, deduction, air_loss, net_deduction, total_amount
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ON DUPLICATE KEY UPDATE
           item_name = VALUES(item_name),
+          quantity = VALUES(quantity),
           gross_weight = VALUES(gross_weight),
           tare_weight = VALUES(tare_weight),
+          net_weight = VALUES(net_weight),
           weighing_loss = VALUES(weighing_loss),
           clean_weight = VALUES(clean_weight),
           container = VALUES(container),
           price = VALUES(price),
           labor_charges = VALUES(labor_charges),
           deduction = VALUES(deduction),
-          air_loss = VALUES(air_loss)`,
+          air_loss = VALUES(air_loss),
+          net_deduction = VALUES(net_deduction),
+          total_amount = VALUES(total_amount)`,
         [
           item_id,
           req.params.id,
           item.item_name,
+          item.quantity,
           item.gross_weight,
           item.tare_weight,
+          item.net_weight,
           item.weighing_loss,
           item.clean_weight,
           item.container,
           item.price,
           item.labor_charges,
           item.deduction,
-          item.air_loss
+          item.air_loss,
+          item.net_deduction,
+          item.total_amount
         ]
       );
     });
+    
 
     await Promise.all(itemPromises);
     await pool.query(

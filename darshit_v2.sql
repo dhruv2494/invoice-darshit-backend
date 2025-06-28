@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jun 26, 2025 at 07:59 PM
+-- Generation Time: Jun 28, 2025 at 01:07 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -53,7 +53,7 @@ CREATE TABLE `invoices` (
   `invoice_number` varchar(50) NOT NULL,
   `date` date NOT NULL,
   `total_amount` decimal(15,2) NOT NULL,
-  `status` enum('draft','sent','paid','void') NOT NULL DEFAULT 'draft',
+  `status` varchar(20) NOT NULL DEFAULT 'draft',
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `notes` text DEFAULT NULL,
   `terms_conditions` text DEFAULT NULL
@@ -71,7 +71,7 @@ CREATE TABLE `invoice_items` (
   `item_name` varchar(255) NOT NULL,
   `gross_weight` decimal(10,2) NOT NULL,
   `tare_weight` decimal(10,2) NOT NULL,
-  `net_weight` decimal(10,2) GENERATED ALWAYS AS (`gross_weight` - `tare_weight`) STORED,
+  `net_weight` decimal(10,2) NOT NULL DEFAULT 0.00,
   `weighing_loss` decimal(10,2) DEFAULT 0.00,
   `clean_weight` decimal(10,2) NOT NULL,
   `container` varchar(255) DEFAULT NULL,
@@ -79,8 +79,8 @@ CREATE TABLE `invoice_items` (
   `labor_charges` decimal(15,2) DEFAULT 0.00,
   `deduction` decimal(15,2) DEFAULT 0.00,
   `air_loss` decimal(15,2) DEFAULT 0.00,
-  `net_deduction` decimal(15,2) GENERATED ALWAYS AS (`deduction` + `air_loss`) STORED,
-  `total_amount` decimal(15,2) GENERATED ALWAYS AS (`clean_weight` * `price` + `labor_charges` - `net_deduction`) STORED,
+  `net_deduction` decimal(15,2) NOT NULL DEFAULT 0.00,
+  `total_amount` decimal(15,2) NOT NULL DEFAULT 0.00,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `description` varchar(255) DEFAULT NULL,
   `quantity` decimal(10,2) DEFAULT NULL
@@ -127,6 +127,20 @@ CREATE TABLE `purchase_orders` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `recent_activities`
+--
+
+CREATE TABLE `recent_activities` (
+  `id` char(36) NOT NULL,
+  `user_id` char(36) NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `status` varchar(50) NOT NULL,
+  `created_at` datetime DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `users`
 --
 
@@ -135,7 +149,10 @@ CREATE TABLE `users` (
   `name` varchar(255) NOT NULL,
   `email` varchar(255) NOT NULL,
   `password_hash` varchar(255) NOT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `phone` varchar(20) DEFAULT NULL,
+  `address` varchar(255) DEFAULT NULL,
+  `company` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -180,6 +197,13 @@ ALTER TABLE `purchase_orders`
   ADD KEY `customer_id` (`supplier_id`);
 
 --
+-- Indexes for table `recent_activities`
+--
+ALTER TABLE `recent_activities`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `fk_recent_activities_user` (`user_id`);
+
+--
 -- Indexes for table `users`
 --
 ALTER TABLE `users`
@@ -214,6 +238,12 @@ ALTER TABLE `po_items`
 --
 ALTER TABLE `purchase_orders`
   ADD CONSTRAINT `po_supplier_fk` FOREIGN KEY (`supplier_id`) REFERENCES `customers` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `recent_activities`
+--
+ALTER TABLE `recent_activities`
+  ADD CONSTRAINT `fk_recent_activities_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

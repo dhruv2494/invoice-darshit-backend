@@ -28,7 +28,6 @@ async function generateInvoicePDF(invoiceData) {
         left: '20px'
       }
     });
-    fs.writeFileSync('invoice-debug.pdf', pdfBuffer);
 
     await browser.close();
     return pdfBuffer;
